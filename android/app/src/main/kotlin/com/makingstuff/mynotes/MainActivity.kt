@@ -1,0 +1,6 @@
+package com.makingstuff.mynotes
+
+import io.flutter.embedding.android.FlutterActivity
+
+class MainActivity: FlutterActivity() {
+}
