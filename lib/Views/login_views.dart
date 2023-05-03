@@ -98,7 +98,6 @@ class _LoginViewState extends State<LoginView> {
                   e.toString(),
                 );
               }
-
               //catch (e)
               //   print(e.runtimeType);
               //   print('Something bad happened');
