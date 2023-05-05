@@ -1,6 +1,6 @@
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
-import 'dart:developer' as devtools show log;
+import 'package:mynotes/Services/auth/Auth_exception.dart';
+import 'package:mynotes/Services/auth/auth_service.dart';
 
 import 'package:mynotes/constants/routes.dart';
 import 'package:mynotes/utilities/show_error_dialog..dart';
@@ -62,46 +62,65 @@ class _RegisterViewState extends State<RegisterView> {
               final password = _password.text;
 
               try {
-                await FirebaseAuth.instance.createUserWithEmailAndPassword(
-                  email: email,
-                  password: password,
-                );
-                final user = FirebaseAuth.instance.currentUser;
-                await user?.sendEmailVerification();
+                await AuthService.firebase()
+                    .createUser(email: email, password: password);
+
+                //final user = AuthService.firebase().currentUser;
+                //await user?.sendEmailVerification();
+                AuthService.firebase().sendEmailVerification();
                 // ignore: use_build_context_synchronously
                 Navigator.of(context).pushNamed(verifyEmailRoute);
                 //devtools.log(UserCredential.toString());
-              } on FirebaseAuthException catch (e) {
-                if (e.code == 'weak-password') {
-                  //devtools.log('Weak Password');
-                  await showErrorDialog(
-                    context,
-                    'Weak Password',
-                  );
-                } else if (e.code == 'email-already-in-use') {
-                  // devtools.log("Email already in use");
-                  await showErrorDialog(
-                    context,
-                    'Email already in use',
-                  );
-                } else if (e.code == 'invalid-email') {
-                  //devtools.log('Invalid Email');
-                  await showErrorDialog(
-                    context,
-                    'Invalid Email',
-                  );
-                } else {
-                  await showErrorDialog(
-                    context,
-                    'Error: ${e.code}',
-                  );
-                }
-              } catch (e) {
+              } on WeakPasswordAuthException {
                 await showErrorDialog(
                   context,
-                  e.toString(),
+                  'Weak Password',
                 );
+              } on EmailAlreadyInUseAuthException {
+                await showErrorDialog(
+                  context,
+                  'Email already in use',
+                );
+              } on InvalidEmailAuthException {
+                await showErrorDialog(
+                  context,
+                  'Invalid Email',
+                );
+              } on GenericAuthException {
+                await showErrorDialog(context, 'Authentication error');
               }
+
+              // on FirebaseAuthException catch (e) {
+              //   if (e.code == 'weak-password') {
+              //     //devtools.log('Weak Password');
+              //     await showErrorDialog(
+              //       context,
+              //       'Weak Password',
+              //     );
+              //   } else if (e.code == 'email-already-in-use') {
+              //     // devtools.log("Email already in use");
+              //     await showErrorDialog(
+              //       context,
+              //       'Email already in use',
+              //     );
+              //   } else if (e.code == 'invalid-email') {
+              //     //devtools.log('Invalid Email');
+              //     await showErrorDialog(
+              //       context,
+              //       'Invalid Email',
+              //     );
+              //   } else {
+              //     await showErrorDialog(
+              //       context,
+              //       'Error: ${e.code}',
+              //     );
+              //   }
+              // } catch (e) {
+              //   await showErrorDialog(
+              //     context,
+              //     e.toString(),
+              //   );
+              // }
 
               //print(UserCredential);
             },
