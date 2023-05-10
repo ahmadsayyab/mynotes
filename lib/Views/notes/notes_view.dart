@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:mynotes/Services/auth/auth_service.dart';
+import 'package:mynotes/Services/cloud/cloud_note.dart';
+import 'package:mynotes/Services/cloud/firebase_cloud_storage.dart';
 import 'package:mynotes/Services/crud/notes_service.dart';
 import 'package:mynotes/Views/notes/notes_list_view.dart';
 import 'package:mynotes/constants/routes.dart';
@@ -15,12 +17,12 @@ class NotesView extends StatefulWidget {
 }
 
 class _NotesViewState extends State<NotesView> {
-  late final NotesService _notesService;
-  String get userEmail => AuthService.firebase().currentUser!.email;
+  late final FirebasseCloudStorage _notesService;
+  String get userId => AuthService.firebase().currentUser!.id;
 
   @override
   void initState() {
-    _notesService = NotesService();
+    _notesService = FirebasseCloudStorage();
     //_notesService.open();
     super.initState();
   }
@@ -71,62 +73,52 @@ class _NotesViewState extends State<NotesView> {
             )
           ],
         ),
-        body: FutureBuilder(
-          future: _notesService.getOrCreateUser(email: userEmail),
-          builder: ((context, snapshot) {
+        body: StreamBuilder(
+          stream: _notesService.allNotes(ownerUserId: userId),
+          builder: (context, snapshot) {
             switch (snapshot.connectionState) {
-              case ConnectionState.done:
-                return StreamBuilder(
-                  stream: _notesService.allNotes,
-                  builder: (context, snapshot) {
-                    switch (snapshot.connectionState) {
-                      case ConnectionState.waiting:
-                      case ConnectionState.active:
-                        if (snapshot.hasData) {
-                          final allNotes = snapshot.data as List<DatabaseNote>;
-                          return NotesListView(
-                            notes: allNotes,
-                            onDeleteNote: (note) async {
-                              await _notesService.deleteNote(id: note.id);
-                            },
-                            onTap: (note) {
-                              Navigator.of(context).pushNamed(
-                                createOrUpdateNoteRoute,
-                                arguments: note,
-                              );
-                            },
-                          );
+              case ConnectionState.waiting:
+              case ConnectionState.active:
+                if (snapshot.hasData) {
+                  final allNotes = snapshot.data as Iterable<CloudNote>;
+                  return NotesListView(
+                    notes: allNotes,
+                    onDeleteNote: (note) async {
+                      await _notesService.deleteNote(
+                          documentId: note.documentId);
+                    },
+                    onTap: (note) {
+                      Navigator.of(context).pushNamed(
+                        createOrUpdateNoteRoute,
+                        arguments: note,
+                      );
+                    },
+                  );
 
-                          //print(allNotes);
-                          //return const Text("Got all the notes");
-                          // return ListView.builder(
-                          //   itemCount: allNotes.length,
-                          //   itemBuilder: (context, index) {
-                          //     final note = allNotes[index];
-                          //     return ListTile(
-                          //       title: Text(
-                          //         note.text,
-                          //         maxLines: 1,
-                          //         softWrap: true,
-                          //         overflow: TextOverflow.ellipsis,
-                          //       ),
-                          //     );
-                          //   },
-                          // );
-                        } else {
-                          return CircularProgressIndicator();
-                        }
-                      //return const Text('Waiting for all notes');
-                      default:
-                        return const CircularProgressIndicator();
-                    }
-                  },
-                );
-
+                  //print(allNotes);
+                  //return const Text("Got all the notes");
+                  // return ListView.builder(
+                  //   itemCount: allNotes.length,
+                  //   itemBuilder: (context, index) {
+                  //     final note = allNotes[index];
+                  //     return ListTile(
+                  //       title: Text(
+                  //         note.text,
+                  //         maxLines: 1,
+                  //         softWrap: true,
+                  //         overflow: TextOverflow.ellipsis,
+                  //       ),
+                  //     );
+                  //   },
+                  // );
+                } else {
+                  return CircularProgressIndicator();
+                }
+              //return const Text('Waiting for all notes');
               default:
                 return const CircularProgressIndicator();
             }
-          }),
+          },
         ));
   }
 }
