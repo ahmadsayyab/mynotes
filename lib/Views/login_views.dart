@@ -81,12 +81,17 @@ class _LoginViewState extends State<LoginView> {
                 //devtools.log(UserCredential.toString());
                 // ignore: use_build_context_synchronously
 
-              } on UserNotFoundAuthException {
+              }
+              // catch (e) {
+              //   print(e);
+              // }
+              on UserNotFoundAuthException {
                 await showErrorDialog(
                   context,
                   'user not found',
                 );
-              } on WeakPasswordAuthException {
+              } on WrongPasswordAuthException {
+                //print('testing');
                 await showErrorDialog(
                   context,
                   'Wrong Credentials',
