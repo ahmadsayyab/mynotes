@@ -1,13 +1,17 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:mynotes/Services/auth/auth_service.dart';
+import 'package:mynotes/Services/auth/bloc/auth_bloc.dart';
+import 'package:mynotes/Services/auth/bloc/auth_events.dart';
 import 'package:mynotes/Services/cloud/cloud_note.dart';
 import 'package:mynotes/Services/cloud/firebase_cloud_storage.dart';
-import 'package:mynotes/Services/crud/notes_service.dart';
+
 import 'package:mynotes/Views/notes/notes_list_view.dart';
 import 'package:mynotes/constants/routes.dart';
 
 import '../../enum/menu_action.dart';
 import 'package:mynotes/utilities/dialogs/logout_dialog.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 
 class NotesView extends StatefulWidget {
   const NotesView({super.key});
@@ -53,10 +57,13 @@ class _NotesViewState extends State<NotesView> {
 
                     //devtools.log(shouldLogout.toString());
                     if (shouldLogout) {
-                      await AuthService.firebase().logOut();
+                      context.read<AuthBloc>().add(
+                            const AuthEventLogOut(),
+                          );
+                      //await AuthService.firebase().logOut();
                       // ignore: use_build_context_synchronously
-                      Navigator.of(context)
-                          .pushNamedAndRemoveUntil(loginRoute, (_) => false);
+                      //   Navigator.of(context)
+                      //       .pushNamedAndRemoveUntil(loginRoute, (_) => false);
                     }
                     break;
                 }
