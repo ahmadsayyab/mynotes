@@ -11,7 +11,6 @@ import 'package:mynotes/constants/routes.dart';
 
 import '../../enum/menu_action.dart';
 import 'package:mynotes/utilities/dialogs/logout_dialog.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
 
 class NotesView extends StatefulWidget {
   const NotesView({super.key});

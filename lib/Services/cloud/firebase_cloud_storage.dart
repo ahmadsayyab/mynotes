@@ -2,7 +2,6 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:mynotes/Services/cloud/cloud_note.dart';
 import 'package:mynotes/Services/cloud/cloud_storage_constants.dart';
 import 'package:mynotes/Services/cloud/cloud_storage_exceptions.dart';
-import 'package:mynotes/Services/crud/crud_exceptions.dart';
 
 class FirebasseCloudStorage {
   //now to talk with firestore, to read all the notes
